@@ -86,6 +86,8 @@ nav button.on{color:var(--tx);font-weight:600}
 #np .bt button.on,#np .ct button.on{color:var(--ac)}
 #np .dv{color:var(--ac);font-size:13px;font-weight:600}
 #nfav{font-size:30px;color:#ffffffb3}
+#np .art{position:relative;overflow:hidden}
+#vid{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;display:none}
 .ct{display:flex;justify-content:space-between;align-items:center;direction:ltr;margin-top:12px}
 .ct button{font-size:24px;padding:10px;color:#ffffffb3}
 .ct button.on{color:var(--ac)}
@@ -119,7 +121,7 @@ nav button.on{color:var(--tx);font-weight:600}
 </nav>
 <section id="np">
   <div class="top"><button data-a="close" aria-label="إغلاق">⌄</button><span class="ctx"><small>سماع من قايمة الأغاني</small><b id="qn">مكتبتك</b></span><button data-a="menu" aria-label="المزيد">⋮</button></div>
-  <div class="art" id="nart"></div>
+  <div class="art" id="nart"><span id="nl"></span><video id="vid" muted playsinline></video></div>
   <div class="ti"><div class="tx"><b id="nnm"></b><small id="nar"></small></div><button class="ic" data-a="fav" id="nfav" aria-label="محبوبة">⊕</button></div>
   <div class="sk"><input type="range" id="sk" min="0" max="1000" value="0" aria-label="التقديم"></div>
   <div class="tm"><span id="cu">0:00</span><span id="du">0:00</span></div>
@@ -135,8 +137,9 @@ nav button.on{color:var(--tx);font-weight:600}
 <div id="ov"><div id="sheet"></div></div>
 <script>
 const $=s=>document.querySelector(s);
-let db=null,songs=[],pls=[],cs=null,queue=[],shuf=false,rep=0,url=null,tab='home',sub=null,lf='all',q='',pend=null,userPaused=false,sleepT=0,qname='مكتبتك';
-const au=new Audio();
+let db=null,songs=[],pls=[],cs=null,queue=[],shuf=false,rep=0,url=null,tab='home',sub=null,lf='all',q='',pend=null,userPaused=false,sleepT=0,qname='مكتبتك',smode='lib',orr=[],omsg='',dlBusy='',prog=0;
+const au=new Audio(),vid=$('#vid');
+const isV=s=>!!s&&/^video\//.test((s.blob&&s.blob.type)||'');
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmt=t=>isFinite(t)?Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0'):'0:00';
 const hue=n=>{let h=0;for(const c of n)h=(h*31+c.charCodeAt(0))%360;return h};
@@ -180,7 +183,7 @@ function render(){
       h+='<div class="quick">'+t.join('')+'</div><h2>كل أغانيك</h2><div class="hs">'+songs.map(s=>`<button class="card" data-a="play" data-id="${s.id}">${art(s)}<b>${esc(s.name)}</b><small>${esc(artist(s))}</small></button>`).join('')+'</div>';
     }
   }else if(tab==='search'){
-    h=`<header><h1>بحث</h1></header><input class="srch" id="q" type="search" placeholder="عايز تسمع إيه؟" value="${esc(q)}"><div id="res"></div>`;
+    h=`<header><h1>بحث</h1></header><div class="chips"><button class="chip ${smode==='lib'?'on':''}" data-a="sm" data-v="lib">مكتبتي</button><button class="chip ${smode==='net'?'on':''}" data-a="sm" data-v="net">على النت</button></div><input class="srch" id="q" type="search" placeholder="${smode==='net'?'ابحث عن أغنية (محتاج إنترنت)':'عايز تسمع إيه؟'}" value="${esc(q)}"><div id="res"></div>`;
   }else{
     h=`<header><h1>مكتبتك</h1>${addBtn}</header><div class="chips"><button class="chip ${lf==='all'?'on':''}" data-a="lf" data-v="all">الكل</button><button class="chip ${lf==='pl'?'on':''}" data-a="lf" data-v="pl">القوائم</button><button class="chip ${lf==='so'?'on':''}" data-a="lf" data-v="so">الأغاني</button></div>`;
     if(lf!=='so')h+=lrow+pls.map(prow).join('')+'<div class="row"><button class="rm" data-a="newpl"><div class="art" style="width:48px;height:48px;border-radius:4px;background:var(--sf2);font-size:26px">+</div><span class="tt"><b>قائمة جديدة</b></span></button></div>';
@@ -190,8 +193,43 @@ function render(){
   if(!sub&&tab==='search')res();
   upd();
 }
+const dn=d=>Array.isArray(d.creator)?d.creator.join(', '):(d.creator||'مجهول');
+const orow=(d,i)=>`<div class="row"><div class="rm" style="cursor:default">${art({name:String(d.title||'♪')},'sm')}<span class="tt"><b>${esc(String(d.title||d.identifier))}</b><small>${esc(String(dn(d)))}</small></span></div><button class="ic" data-a="dl" data-i="${i}" aria-label="تحميل">${dlBusy===d.identifier?(prog+'%'):'⬇'}</button></div>`;
+function orender(){
+  const r=$('#res');if(!r)return;
+  r.innerHTML='<div style="padding:0 16px"><button class="add" data-a="osearch" style="width:100%;padding:12px">🔎 دوّر على النت</button></div>'+(omsg?`<div class="empty">${esc(omsg)}</div>`:'<div class="empty" style="padding:14px">النتائج من أرشيف الإنترنت (موسيقى حرة وقرآن وتراث). التطبيق بيشتغل أوفلاين، والنت مطلوب للبحث والتحميل بس.</div>')+orr.map(orow).join('');
+}
+async function osearch(){
+  const t=q.trim();if(!t){omsg='اكتب اسم الأغنية الأول.';return orender()}
+  if(navigator.onLine===false){omsg='مفيش نت دلوقتي.';return orender()}
+  omsg='بدوّر…';orr=[];orender();
+  try{
+    const u='https://archive.org/advancedsearch.php?q='+encodeURIComponent('('+t+') AND mediatype:audio')+'&fl[]=identifier&fl[]=title&fl[]=creator&rows=25&page=1&output=json&sort[]='+encodeURIComponent('downloads desc');
+    const j=await (await fetch(u)).json();
+    orr=(j.response&&j.response.docs)||[];omsg=orr.length?'':'مفيش نتيجة. جرّب كلمة تانية.';
+  }catch(e){omsg='ما قدرتش أوصل للنت. اتأكد إنك متصل وجرّب تاني.'}
+  orender();
+}
+async function dl(i){
+  const d=orr[i];if(!d||dlBusy)return;
+  dlBusy=d.identifier;prog=0;orender();
+  try{
+    const m=await (await fetch('https://archive.org/metadata/'+encodeURIComponent(d.identifier))).json();
+    const fs=(m.files||[]).filter(f=>/mp3/i.test(f.format||'')||/\.mp3$/i.test(f.name||''));
+    const f=fs.find(x=>+x.size>150000&&+x.size<80e6)||fs[0];
+    if(!f)throw new Error('no mp3');
+    const url='https://archive.org/download/'+encodeURIComponent(d.identifier)+'/'+f.name.split('/').map(encodeURIComponent).join('/');
+    const r=await fetch(url);if(!r.ok)throw new Error('http');
+    const total=+r.headers.get('content-length')||+f.size||0,rd=r.body.getReader(),ch=[];let got=0;
+    for(;;){const x=await rd.read();if(x.done)break;ch.push(x.value);got+=x.value.length;prog=total?Math.min(99,Math.round(got/total*100)):0;orender()}
+    const s={name:String(d.title||f.name).replace(/^[\s_\-]+/,''),artist:String(dn(d)),blob:new Blob(ch,{type:'audio/mpeg'}),fav:false};
+    await save('s',s);songs.push(s);omsg='اتحمّلت وبقت في مكتبتك ✔';
+  }catch(e){omsg='فشل التحميل. جرّب نتيجة تانية.'}
+  dlBusy='';prog=0;orender();
+}
 function res(){
   const r=$('#res');if(!r)return;
+  if(smode==='net')return orender();
   const L=ctx();
   r.innerHTML=!songs.length?empty:!q?'<div class="empty">اكتب اسم أغنية أو فنان.</div>':L.length?L.map(row).join(''):'<div class="empty">مفيش نتيجة.</div>';
 }
@@ -200,7 +238,7 @@ function upd(){
   const ic=au.paused?'▶':'❚❚';$('#mpp').textContent=ic;$('#npp').textContent=ic;
   if(!cs)return;
   $('#mart').innerHTML=art(cs);$('#mnm').textContent=cs.name;$('#mar').textContent=artist(cs);
-  const n=$('#nart');n.style.background=cs.cover?'':grad(cs.name);n.style.backgroundImage=cs.cover?`url(${cu(cs)})`:'';n.textContent=cs.cover?'':ini(cs.name);
+  const n=$('#nart');n.style.background=cs.cover?'':grad(cs.name);n.style.backgroundImage=cs.cover?`url(${cu(cs)})`:'';$('#nl').textContent=cs.cover?'':ini(cs.name);
   $('#nnm').textContent=cs.name;$('#qn').textContent=qname;$('#nar').textContent=artist(cs);
   $('#np').style.background=`linear-gradient(hsl(${hue(cs.name)} 45% 28%),var(--bg) 75%)`;
   $('#mini').style.background=`hsl(${hue(cs.name)} 35% 22%)`;
@@ -211,7 +249,7 @@ function setMeta(){if(!('mediaSession' in navigator)||!cs)return;try{navigator.m
 function play(list,i){
   if(i<0||i>=list.length)return;
   queue=list;cs=list[i];if(url)URL.revokeObjectURL(url);
-  url=URL.createObjectURL(cs.blob);au.src=url;userPaused=false;au.play().catch(()=>{});
+  url=URL.createObjectURL(cs.blob);au.src=url;if(isV(cs)){vid.src=url;vid.style.display='block'}else{vid.pause();vid.removeAttribute('src');vid.load();vid.style.display='none'}userPaused=false;au.play().catch(()=>{});
   setMeta();
   render();
 }
@@ -275,26 +313,30 @@ async function act(e){
   else if(a==='delpl'){const p=pls.find(x=>x.id===sub.id);await del('p',p.id);pls=pls.filter(x=>x!==p);sub=null;close();render()}
   else if(a==='sleep')sheet('<b>مؤقت النوم</b>'+[5,10,15,30,45,60].map(m=>`<button class="sb" data-a="slp" data-m="${m}">${m} دقيقة</button>`).join('')+'<button class="sb" data-a="slp" data-m="0">إلغاء المؤقت</button>');
   else if(a==='slp'){clearTimeout(sleepT);const m=+b.dataset.m;$('#slp').classList.toggle('on',m>0);if(m>0)sleepT=setTimeout(()=>{userPaused=true;au.pause();$('#slp').classList.remove('on')},m*60000);close()}
+  else if(a==='sm'){smode=b.dataset.v;render()}
+  else if(a==='osearch')osearch();
+  else if(a==='dl')dl(+b.dataset.i);
   else if(a==='cancel')close();
 }
 document.addEventListener('click',act);
 $('#ov').onclick=e=>{if(e.target.id==='ov')close()};
 document.querySelectorAll('nav button[data-t]').forEach(b=>b.onclick=()=>{
   tab=b.dataset.t;sub=null;document.querySelectorAll('nav button[data-t]').forEach(x=>x.classList.toggle('on',x===b));$('#np').style.display='none';render()});
-document.addEventListener('input',e=>{if(e.target.id==='q'){q=e.target.value.trim().toLowerCase();res()}});
+document.addEventListener('input',e=>{if(e.target.id==='q'){q=e.target.value.trim().toLowerCase();if(smode==='lib')res()}});
+document.addEventListener('keydown',e=>{if(e.target.id==='q'&&e.key==='Enter'&&smode==='net'){e.preventDefault();osearch()}});
 $('#img').onchange=e=>{pend=e.target.files[0]||null;const k=$('#pk');if(k&&pend)k.textContent='✓ تم اختيار: '+pend.name;e.target.value=''};
 $('#file').onchange=async e=>{
   for(const f of e.target.files){const s={name:f.name.replace(/\.[^.]+$/,'').replace(/^[\s_\-]+/,''),blob:f,fav:false};await save('s',s);songs.push(s)}
   e.target.value='';const first=!cs&&songs.length;render();if(first)play(songs,0);
 };
 $('#sk').oninput=e=>{e.target.style.setProperty('--p',e.target.value/10+'%');if(au.duration)au.currentTime=au.duration*e.target.value/1000};
-au.ontimeupdate=()=>{$('#cu').textContent=fmt(au.currentTime);const p=au.duration?au.currentTime/au.duration:0;$('#sk').value=p*1000;$('#sk').style.setProperty('--p',p*100+'%');$('#pg').style.width=p*100+'%'};
+au.ontimeupdate=()=>{if(isV(cs)&&!vid.paused&&Math.abs(vid.currentTime-au.currentTime)>0.4)vid.currentTime=au.currentTime;$('#cu').textContent=fmt(au.currentTime);const p=au.duration?au.currentTime/au.duration:0;$('#sk').value=p*1000;$('#sk').style.setProperty('--p',p*100+'%');$('#pg').style.width=p*100+'%'};
 au.onloadedmetadata=()=>{$('#du').textContent=fmt(au.duration);nat()};
-au.onplay=()=>{if('mediaSession' in navigator)navigator.mediaSession.playbackState='playing';upd();nat()};
-au.onpause=()=>{if('mediaSession' in navigator)navigator.mediaSession.playbackState='paused';upd();nat();
+au.onplay=()=>{if('mediaSession' in navigator)navigator.mediaSession.playbackState='playing';if(isV(cs)){vid.currentTime=au.currentTime;vid.play().catch(()=>{})}upd();nat()};
+au.onpause=()=>{if('mediaSession' in navigator)navigator.mediaSession.playbackState='paused';vid.pause();upd();nat();
   if(document.hidden&&!userPaused&&!au.ended&&cs)setTimeout(()=>{if(au.paused&&!userPaused)au.play().catch(()=>{})},200)};
 au.onended=()=>next(true);
-au.onseeked=()=>nat();
+au.onseeked=()=>{if(isV(cs))vid.currentTime=au.currentTime;nat()};
 if('mediaSession' in navigator){const m=navigator.mediaSession,H=(a,f)=>{try{m.setActionHandler(a,f)}catch(e){}};
   H('play',()=>{userPaused=false;au.play()});H('pause',()=>{userPaused=true;au.pause()});
   H('nexttrack',()=>next(false));H('previoustrack',prev);

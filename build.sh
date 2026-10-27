@@ -63,6 +63,7 @@ EOF_D
 cat > "$P/app/src/main/AndroidManifest.xml" <<'EOF_E'
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
@@ -180,7 +181,32 @@ public class MainActivity extends Activity {
         web.setWebViewClient(new WebViewClient() {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView v, WebResourceRequest r) {
-                return loader.shouldInterceptRequest(r.getUrl());
+                Uri u = r.getUrl();
+                String host = u.getHost() == null ? "" : u.getHost();
+                if ((host.equals("archive.org") || host.endsWith(".archive.org")) && "GET".equals(r.getMethod())) {
+                    try {
+                        java.net.HttpURLConnection c = (java.net.HttpURLConnection) new java.net.URL(u.toString()).openConnection();
+                        c.setInstanceFollowRedirects(true);
+                        c.setConnectTimeout(15000);
+                        c.setReadTimeout(30000);
+                        c.setRequestProperty("User-Agent", "Maktabti/1.0");
+                        int code = c.getResponseCode();
+                        String ct = c.getContentType();
+                        String mime = ct == null ? "application/octet-stream" : ct.split(";")[0].trim();
+                        java.util.Map<String, String> hd = new java.util.HashMap<String, String>();
+                        hd.put("Access-Control-Allow-Origin", "*");
+                        long len = c.getContentLengthLong();
+                        if (len >= 0 && (mime.startsWith("audio") || mime.startsWith("video") || mime.equals("application/octet-stream"))) {
+                            hd.put("Content-Length", String.valueOf(len));
+                        }
+                        java.io.InputStream in = code >= 400 ? c.getErrorStream() : c.getInputStream();
+                        if (in == null || code < 200 || (code >= 300 && code < 400)) return null;
+                        return new WebResourceResponse(mime, null, code, "OK", hd, in);
+                    } catch (Exception e) {
+                        return null;
+                    }
+                }
+                return loader.shouldInterceptRequest(u);
             }
         });
         web.setWebChromeClient(new WebChromeClient() {
