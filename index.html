@@ -271,9 +271,9 @@ $('#file').onchange=async e=>{
 };
 $('#sk').oninput=e=>{if(au.duration)au.currentTime=au.duration*e.target.value/1000};
 au.ontimeupdate=()=>{$('#cu').textContent=fmt(au.currentTime);const p=au.duration?au.currentTime/au.duration:0;$('#sk').value=p*1000;$('#pg').style.width=p*100+'%'};
-au.onloadedmetadata=()=>$('#du').textContent=fmt(au.duration);
-au.onplay=()=>{if('mediaSession' in navigator)navigator.mediaSession.playbackState='playing';upd()};
-au.onpause=()=>{if('mediaSession' in navigator)navigator.mediaSession.playbackState='paused';upd();
+au.onloadedmetadata=()=>{$('#du').textContent=fmt(au.duration);nat()};
+au.onplay=()=>{if('mediaSession' in navigator)navigator.mediaSession.playbackState='playing';upd();nat()};
+au.onpause=()=>{if('mediaSession' in navigator)navigator.mediaSession.playbackState='paused';upd();nat();
   if(document.hidden&&!userPaused&&!au.ended&&cs)setTimeout(()=>{if(au.paused&&!userPaused)au.play().catch(()=>{})},200)};
 au.onended=()=>next(true);
 if('mediaSession' in navigator){const m=navigator.mediaSession,H=(a,f)=>{try{m.setActionHandler(a,f)}catch(e){}};
@@ -281,6 +281,9 @@ if('mediaSession' in navigator){const m=navigator.mediaSession,H=(a,f)=>{try{m.s
   H('nexttrack',()=>next(false));H('previoustrack',prev);
   H('seekto',d=>{if(d.seekTime!=null)au.currentTime=d.seekTime});
   H('seekforward',()=>{au.currentTime+=10});H('seekbackward',()=>{au.currentTime-=10})}
+function nat(){try{if(window.Native)Native.state(!au.paused,cs?cs.name:'',cs?artist(cs):'')}catch(e){}}
+window.__cmd=c=>{if(c==='next')next(false);else if(c==='prev')prev();else if(c==='pp'){if(au.paused){userPaused=false;au.play()}else{userPaused=true;au.pause()}}};
+window.__back=()=>{if($('#ov').style.display==='flex'){close();return true}if($('#np').style.display==='flex'){$('#np').style.display='none';return true}if(sub){sub=null;render();return true}return false};
 if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 (async()=>{try{db=await openDB();songs=await getAll('s');pls=await getAll('p')}catch(e){db=null}render()})();
