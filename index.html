@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#121212">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>مكتبتي – أغاني من غير نت</title>
+<style>
+:root{--bg:#121212;--sf:#1f1f1f;--sf2:#2a2a2a;--tx:#fff;--mu:#a7a7a7;--ac:#1ed760;--on:#000;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#fff;--sf:#f0f0f0;--sf2:#e2e2e2;--tx:#121212;--mu:#6a6a6a;--ac:#169c46;--on:#fff;color-scheme:light}}
+:root[data-theme="dark"]{--bg:#121212;--sf:#1f1f1f;--sf2:#2a2a2a;--tx:#fff;--mu:#a7a7a7;--ac:#1ed760;--on:#000}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,'Segoe UI',Roboto,Tahoma,Arial,sans-serif;padding-bottom:calc(140px + env(safe-area-inset-bottom,0px))}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+button:focus-visible,input:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+header{display:flex;align-items:center;justify-content:space-between;padding:18px 16px 8px}
+h1{margin:0;font-size:26px;font-weight:800}
+h2{margin:22px 16px 10px;font-size:21px;font-weight:800}
+.add{background:var(--ac);color:var(--on);font-weight:800;padding:8px 16px;border-radius:999px;font-size:14px}
+.chips{display:flex;gap:8px;padding:6px 16px}
+.chip{background:var(--sf);padding:7px 16px;border-radius:999px;font-size:14px}
+.chip.on{background:var(--ac);color:var(--on);font-weight:600}
+.quick{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 16px}
+.qt{display:flex;align-items:center;gap:10px;background:var(--sf);border-radius:6px;overflow:hidden;text-align:start;height:56px;padding-inline-end:8px}
+.qt .art{width:56px;height:56px;border-radius:0;flex:none}
+.qt b{font-size:13px;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.hs{display:flex;gap:14px;overflow-x:auto;padding:0 16px 4px}
+.card{flex:none;width:140px;text-align:start}
+.card .art{width:140px;height:140px;border-radius:8px;font-size:48px}
+.card b{display:block;margin-top:8px;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+small{color:var(--mu);font-size:12px}
+.art{display:flex;align-items:center;justify-content:center;font-weight:800;color:#ffffffcc;background-size:cover;background-position:center}
+.row{display:flex;align-items:center;padding:4px 8px 4px 4px}
+.rm{flex:1;display:flex;align-items:center;gap:12px;min-width:0;text-align:start;padding:6px 8px}
+.rm .art{width:48px;height:48px;border-radius:4px;flex:none;font-size:20px}
+.tt{display:flex;flex-direction:column;min-width:0}
+.tt b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row.on .tt b{color:var(--ac)}
+.ic{padding:10px;font-size:20px;color:var(--mu)}
+.srch{display:block;width:calc(100% - 32px);margin:10px 16px;padding:13px 16px;border-radius:8px;border:0;background:var(--sf2);color:var(--tx);font:inherit;font-weight:600}
+.empty{margin:30px 16px;padding:28px 18px;background:var(--sf);border-radius:12px;text-align:center;color:var(--mu);line-height:1.9}
+.empty b{display:block;color:var(--tx);font-size:19px;margin-bottom:4px}
+.sh{display:flex;justify-content:space-between;padding:10px 6px 0}
+.hero{display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px 16px}
+.hero .art{width:190px;height:190px;border-radius:6px;font-size:70px;box-shadow:0 10px 30px #0006}
+.hero h1{margin-top:10px;align-self:flex-start}
+.hero small{align-self:flex-start}
+.acts{display:flex;justify-content:flex-end;align-items:center;gap:6px;padding:4px 16px 8px;direction:ltr}
+.big{font-size:22px;padding:10px;color:var(--mu)}
+.big.go{background:var(--ac);color:var(--on);width:54px;height:54px;border-radius:50%;padding:0}
+#mini{position:fixed;inset-inline:8px;bottom:calc(64px + env(safe-area-inset-bottom,0px));border-radius:8px;display:none;overflow:hidden;color:#fff}
+#mini .in{display:flex;align-items:center;gap:10px;padding:6px 6px 8px}
+#mini .art{width:42px;height:42px;border-radius:4px;font-size:18px}
+#mini .o{flex:1;min-width:0;text-align:start;display:flex;align-items:center;gap:10px}
+#mini .o b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}
+#mini .o small{color:#ffffffb3}
+#mini .pl{font-size:20px;padding:8px 12px}
+#pg{position:absolute;bottom:0;inset-inline-start:0;height:2px;background:#fff;width:0}
+nav{position:fixed;inset:auto 0 0 0;display:flex;background:linear-gradient(transparent,var(--bg) 35%);padding:10px 0 env(safe-area-inset-bottom,0px)}
+nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--mu);font-size:11px;padding:6px}
+nav button span{font-size:22px;line-height:1}
+nav button.on{color:var(--tx);font-weight:600}
+#np{position:fixed;inset:0;z-index:5;display:none;flex-direction:column;padding:calc(14px + env(safe-area-inset-top,0px)) 24px calc(24px + env(safe-area-inset-bottom,0px));background:var(--bg);overflow:auto;color:#fff}
+#np .art{width:100%;max-width:340px;aspect-ratio:1;margin:18px auto;border-radius:10px;font-size:110px;box-shadow:0 12px 40px #0008;flex:none}
+#np .top{display:flex;justify-content:space-between;align-items:center;font-size:13px}
+#np .top button{font-size:26px;padding:6px 10px;color:#fff}
+#np .ti{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px}
+#np .ti b{font-size:22px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+#np small{color:#ffffffb3}
+#np .sk{direction:ltr;display:flex;align-items:center;gap:10px;margin-top:14px;font-size:12px;color:#ffffffb3}
+#np .sk input{flex:1;accent-color:#fff}
+.ct{display:flex;justify-content:space-between;align-items:center;direction:ltr;margin-top:12px}
+.ct button{font-size:24px;padding:10px;color:#ffffffb3}
+.ct button.on{color:var(--ac)}
+.ct .pp{width:64px;height:64px;border-radius:50%;background:#fff;color:#000;font-size:24px;padding:0}
+#ov{position:fixed;inset:0;z-index:9;background:#000a;display:none;align-items:flex-end}
+#sheet{width:100%;max-height:82%;overflow:auto;background:var(--sf);border-radius:16px 16px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.sb{display:block;width:100%;text-align:start;padding:14px 6px;font-size:16px;font-weight:600}
+.sb.ac{background:var(--ac);color:var(--on);border-radius:999px;text-align:center;margin-top:8px}
+.sd{display:flex;gap:12px;align-items:center;padding-bottom:12px;margin-bottom:4px;border-bottom:1px solid var(--sf2)}
+.sd .art{width:52px;height:52px;border-radius:4px;flex:none}
+.in2{display:block;width:100%;margin:8px 0;padding:12px 14px;border-radius:8px;border:0;background:var(--sf2);color:var(--tx);font:inherit}
+</style>
+</head>
+<body>
+<main id="view"></main>
+<input type="file" id="file" accept="audio/*" multiple hidden>
+<input type="file" id="img" accept="image/*" hidden>
+<div id="mini">
+  <div class="in">
+    <button class="o" data-a="open" aria-label="فتح المشغل"><span id="mart"></span><span style="min-width:0"><b id="mnm"></b><small id="mar"></small></span></button>
+    <button class="ic" data-a="fav" id="mfav" aria-label="محبوبة">♡</button>
+    <button class="pl" data-a="pp" id="mpp" aria-label="تشغيل">▶</button>
+  </div>
+  <div id="pg"></div>
+</div>
+<nav>
+  <button data-t="home" class="on"><span>⌂</span>الرئيسية</button>
+  <button data-t="search"><span>⌕</span>بحث</button>
+  <button data-t="lib"><span>☰</span>مكتبتك</button>
+</nav>
+<section id="np">
+  <div class="top"><button data-a="close" aria-label="إغلاق">⌄</button><span>بتشتغل من مكتبتك</span><button data-a="menu" aria-label="المزيد">⋮</button></div>
+  <div class="art" id="nart"></div>
+  <div class="ti"><div style="min-width:0"><b id="nnm"></b><small id="nar"></small></div><button class="ic" data-a="fav" id="nfav" style="font-size:26px">♡</button></div>
+  <div class="sk"><span id="cu">0:00</span><input type="range" id="sk" min="0" max="1000" value="0" aria-label="التقديم"><span id="du">0:00</span></div>
+  <div class="ct">
+    <button data-a="shuf" id="sh" aria-label="عشوائي">⇄</button>
+    <button data-a="prev" aria-label="السابقة">⏮</button>
+    <button class="pp" data-a="pp" id="npp" aria-label="تشغيل">▶</button>
+    <button data-a="next" aria-label="التالية">⏭</button>
+    <button data-a="rep" id="rp" aria-label="تكرار">↻</button>
+  </div>
+</section>
+<div id="ov"><div id="sheet"></div></div>
+<script>
+const $=s=>document.querySelector(s);
+let db=null,songs=[],pls=[],cs=null,queue=[],shuf=false,rep=0,url=null,tab='home',sub=null,lf='all',q='',pend=null;
+const au=new Audio();
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=t=>isFinite(t)?Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0'):'0:00';
+const hue=n=>{let h=0;for(const c of n)h=(h*31+c.charCodeAt(0))%360;return h};
+const grad=n=>`linear-gradient(135deg,hsl(${hue(n)} 55% 42%),hsl(${(hue(n)+50)%360} 60% 22%))`;
+const cu=s=>s._cu||(s._cu=URL.createObjectURL(s.cover));
+const art=(s,c='')=>s.cover?`<div class="art ${c}" style="background-image:url(${cu(s)})"></div>`:`<div class="art ${c}" style="background:${grad(s.name)}">${esc([...s.name][0]||'♪')}</div>`;
+const likedArt=c=>`<div class="art ${c||''}" style="background:linear-gradient(135deg,#450af5,#c4efd9)">♥</div>`;
+const plArt=(p,c)=>`<div class="art ${c||''}" style="background:linear-gradient(135deg,hsl(${hue(p.name)} 50% 40%),#222)">☰</div>`;
+const sg=id=>songs.find(s=>s.id===id);
+const artist=s=>s.artist||'مكتبتي';
+function openDB(){return new Promise((res,rej)=>{try{const r=indexedDB.open('offline-music',2);r.onupgradeneeded=()=>{const d=r.result;for(const n of['s','p'])if(!d.objectStoreNames.contains(n))d.createObjectStore(n,{keyPath:'id',autoIncrement:true})};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}})}
+const st=(n,m)=>db.transaction(n,m).objectStore(n);
+const getAll=n=>new Promise(res=>{const r=st(n,'readonly').getAll();r.onsuccess=()=>res(r.result);r.onerror=()=>res([])});
+const save=(n,o)=>new Promise(res=>{if(!db){if(!o.id)o.id=Date.now()+Math.random();return res()}const c={...o};delete c._cu;const r=st(n,'readwrite').put(c);r.onsuccess=()=>{o.id=r.result;res()};r.onerror=()=>res()});
+const del=(n,id)=>new Promise(res=>{if(!db)return res();const r=st(n,'readwrite').delete(id);r.onsuccess=r.onerror=()=>res()});
+
+function ctx(){
+  if(sub&&sub.t==='liked')return songs.filter(s=>s.fav);
+  if(sub){const p=pls.find(x=>x.id===sub.id);return p?p.ids.map(sg).filter(Boolean):[]}
+  if(tab==='search')return q?songs.filter(s=>(s.name+' '+(s.artist||'')).toLowerCase().includes(q)):[];
+  return songs;
+}
+const row=s=>`<div class="row ${s===cs?'on':''}"><button class="rm" data-a="play" data-id="${s.id}">${art(s)}<span class="tt"><b>${esc(s.name)}</b><small>${esc(artist(s))}</small></span></button><button class="ic" data-a="menu" data-id="${s.id}" aria-label="المزيد">⋮</button></div>`;
+const empty='<div class="empty"><b>المكتبة فاضية</b>دوس على «ضيف أغاني» واختار الملفات من موبايلك. هتتحفظ هنا وتشتغل من غير نت.</div>';
+const addBtn='<button class="add" data-a="add">+ ضيف أغاني</button>';
+const lrow=`<div class="row"><button class="rm" data-a="liked">${likedArt()}<span class="tt"><b>أغاني محبوبة</b><small>قائمة · ${songs.filter(s=>s.fav).length} أغنية</small></span></button></div>`;
+const prow=p=>`<div class="row"><button class="rm" data-a="openpl" data-id="${p.id}">${plArt(p)}<span class="tt"><b>${esc(p.name)}</b><small>قائمة · ${p.ids.length} أغنية</small></span></button></div>`;
+
+function render(){
+  const v=$('#view');let h='';
+  if(sub){
+    const L=ctx(),p=sub.t==='pl'?pls.find(x=>x.id===sub.id):null;
+    h=`<div class="sh"><button class="ic" data-a="back" aria-label="رجوع">›</button>${p?'<button class="ic" data-a="plmenu" aria-label="المزيد">⋮</button>':''}</div><div class="hero">${p?plArt(p):likedArt()}<h1>${esc(p?p.name:'أغاني محبوبة')}</h1><small>${L.length} أغنية</small></div><div class="acts"><button class="big go" data-a="playall" aria-label="تشغيل">▶</button><button class="big" data-a="shufall" aria-label="عشوائي">⇄</button></div>`+(L.length?L.map(row).join(''):'<div class="empty">القائمة فاضية. من ⋮ على أي أغنية اختار «ضيف لقائمة».</div>');
+  }else if(tab==='home'){
+    const hr=new Date().getHours();
+    h=`<header><h1>${hr<12?'صباح الخير':hr<18?'مساء النور':'مساء الخير'}</h1>${addBtn}</header>`;
+    if(!songs.length)h+=empty;else{
+      const t=[`<button class="qt" data-a="liked">${likedArt()}<b>أغاني محبوبة</b></button>`,...pls.map(p=>`<button class="qt" data-a="openpl" data-id="${p.id}">${plArt(p)}<b>${esc(p.name)}</b></button>`),...songs.map(s=>`<button class="qt" data-a="play" data-id="${s.id}">${art(s)}<b>${esc(s.name)}</b></button>`)].slice(0,6);
+      h+='<div class="quick">'+t.join('')+'</div><h2>كل أغانيك</h2><div class="hs">'+songs.map(s=>`<button class="card" data-a="play" data-id="${s.id}">${art(s)}<b>${esc(s.name)}</b><small>${esc(artist(s))}</small></button>`).join('')+'</div>';
+    }
+  }else if(tab==='search'){
+    h=`<header><h1>بحث</h1></header><input class="srch" id="q" type="search" placeholder="عايز تسمع إيه؟" value="${esc(q)}"><div id="res"></div>`;
+  }else{
+    h=`<header><h1>مكتبتك</h1>${addBtn}</header><div class="chips"><button class="chip ${lf==='all'?'on':''}" data-a="lf" data-v="all">الكل</button><button class="chip ${lf==='pl'?'on':''}" data-a="lf" data-v="pl">القوائم</button><button class="chip ${lf==='so'?'on':''}" data-a="lf" data-v="so">الأغاني</button></div>`;
+    if(lf!=='so')h+=lrow+pls.map(prow).join('')+'<div class="row"><button class="rm" data-a="newpl"><div class="art" style="width:48px;height:48px;border-radius:4px;background:var(--sf2);font-size:26px">+</div><span class="tt"><b>قائمة جديدة</b></span></button></div>';
+    if(lf!=='pl')h+=songs.length?songs.map(row).join(''):empty;
+  }
+  v.innerHTML=h;
+  if(!sub&&tab==='search')res();
+  upd();
+}
+function res(){
+  const r=$('#res');if(!r)return;
+  const L=ctx();
+  r.innerHTML=!songs.length?empty:!q?'<div class="empty">اكتب اسم أغنية أو فنان.</div>':L.length?L.map(row).join(''):'<div class="empty">مفيش نتيجة.</div>';
+}
+function upd(){
+  $('#mini').style.display=cs?'block':'none';
+  const ic=au.paused?'▶':'❚❚';$('#mpp').textContent=ic;$('#npp').textContent=ic;
+  if(!cs)return;
+  $('#mart').innerHTML=art(cs);$('#mnm').textContent=cs.name;$('#mar').textContent=artist(cs);
+  const n=$('#nart');n.style.background=cs.cover?'':grad(cs.name);n.style.backgroundImage=cs.cover?`url(${cu(cs)})`:'';n.textContent=cs.cover?'':([...cs.name][0]||'♪');
+  $('#nnm').textContent=cs.name;$('#nar').textContent=artist(cs);
+  $('#np').style.background=`linear-gradient(hsl(${hue(cs.name)} 45% 28%),var(--bg) 75%)`;
+  $('#mini').style.background=`hsl(${hue(cs.name)} 35% 22%)`;
+  for(const id of['mfav','nfav']){const b=$('#'+id);b.textContent=cs.fav?'♥':'♡';b.style.color=cs.fav?'var(--ac)':'#ffffffb3'}
+}
+function play(list,i){
+  if(i<0||i>=list.length)return;
+  queue=list;cs=list[i];if(url)URL.revokeObjectURL(url);
+  url=URL.createObjectURL(cs.blob);au.src=url;au.play().catch(()=>{});
+  if('mediaSession' in navigator){try{navigator.mediaSession.metadata=new MediaMetadata({title:cs.name,artist:artist(cs)})}catch(e){}}
+  render();
+}
+function next(auto){
+  if(!queue.length)return;
+  const i=queue.indexOf(cs);
+  if(auto&&rep===2)return play(queue,i);
+  let n=shuf&&queue.length>1?Math.floor(Math.random()*queue.length):i+1;
+  if(shuf&&n===i)n=(i+1)%queue.length;
+  if(n>=queue.length){if(rep===1||!auto)n=0;else return upd()}
+  play(queue,n);
+}
+function prev(){if(au.currentTime>3)au.currentTime=0;else{const i=queue.indexOf(cs);play(queue,i<=0?queue.length-1:i-1)}}
+function sheet(h){$('#sheet').innerHTML=h;$('#ov').style.display='flex'}
+const close=()=>$('#ov').style.display='none';
+function songMenu(s){
+  const inPl=sub&&sub.t==='pl';
+  sheet(`<div class="sd">${art(s)}<span class="tt"><b>${esc(s.name)}</b><small>${esc(artist(s))}</small></span></div>
+  <button class="sb" data-a="fav" data-id="${s.id}">${s.fav?'♥ شيل من المحبوبة':'♡ ضيف للمحبوبة'}</button>
+  <button class="sb" data-a="addpl" data-id="${s.id}">＋ ضيف لقائمة</button>
+  ${inPl?`<button class="sb" data-a="rmpl" data-id="${s.id}">− شيل من القائمة دي</button>`:''}
+  <button class="sb" data-a="edit" data-id="${s.id}">✎ عدّل الاسم والفنان والصورة</button>
+  <button class="sb" data-a="delask" data-id="${s.id}">✕ امسح الأغنية</button>`);
+}
+async function act(e){
+  const b=e.target.closest('[data-a]');if(!b)return;
+  const a=b.dataset.a,id=b.dataset.id?+b.dataset.id:null;
+  const s=id!=null?sg(id):null;
+  if(a==='play'){const L=ctx();play(L,L.indexOf(s))}
+  else if(a==='add')$('#file').click();
+  else if(a==='lf'){lf=b.dataset.v;render()}
+  else if(a==='liked'){sub={t:'liked'};render()}
+  else if(a==='openpl'){sub={t:'pl',id};render()}
+  else if(a==='back'){sub=null;render()}
+  else if(a==='playall'){const L=ctx();if(L.length)play(L,0)}
+  else if(a==='shufall'){const L=ctx();if(L.length){shuf=true;$('#sh').classList.add('on');play(L,Math.floor(Math.random()*L.length))}}
+  else if(a==='fav'){const t=s||cs;if(!t)return;t.fav=!t.fav;await save('s',t);close();render()}
+  else if(a==='menu'){const t=s||cs;if(t)songMenu(t)}
+  else if(a==='pp'){if(!cs){const L=ctx();if(L.length)play(L,0)}else au.paused?au.play():au.pause()}
+  else if(a==='open')$('#np').style.display='flex';
+  else if(a==='close')$('#np').style.display='none';
+  else if(a==='next')next(false);
+  else if(a==='prev')prev();
+  else if(a==='shuf'){shuf=!shuf;$('#sh').classList.toggle('on',shuf)}
+  else if(a==='rep'){rep=(rep+1)%3;const r=$('#rp');r.classList.toggle('on',rep>0);r.textContent=rep===2?'①':'↻'}
+  else if(a==='newpl'){sheet(`<b>قائمة جديدة</b><input class="in2" id="pn" placeholder="اسم القائمة"><button class="sb ac" data-a="mkpl" ${id!=null?`data-id="${id}"`:''}>اعمل القائمة</button>`)}
+  else if(a==='mkpl'){const n=$('#pn').value.trim();if(!n)return;const p={name:n,ids:s?[s.id]:[]};await save('p',p);pls.push(p);close();render()}
+  else if(a==='addpl'){
+    sheet(`<b>ضيف لقائمة</b>`+pls.map(p=>`<button class="sb" data-a="togpl" data-id="${s.id}" data-p="${p.id}">${p.ids.includes(s.id)?'✓ ':''}${esc(p.name)}</button>`).join('')+`<button class="sb ac" data-a="newpl" data-id="${s.id}">قائمة جديدة</button>`)}
+  else if(a==='togpl'){const p=pls.find(x=>x.id===+b.dataset.p);p.ids=p.ids.includes(s.id)?p.ids.filter(x=>x!==s.id):[...p.ids,s.id];await save('p',p);close();render()}
+  else if(a==='rmpl'){const p=pls.find(x=>x.id===sub.id);p.ids=p.ids.filter(x=>x!==s.id);await save('p',p);close();render()}
+  else if(a==='edit'){pend=null;sheet(`<b>عدّل الأغنية</b><input class="in2" id="e1" value="${esc(s.name)}" placeholder="اسم الأغنية"><input class="in2" id="e2" value="${esc(s.artist||'')}" placeholder="اسم الفنان"><button class="sb" data-a="pick">🖼 اختار صورة الغلاف</button><span id="pk"></span><button class="sb ac" data-a="saveedit" data-id="${s.id}">احفظ</button>`)}
+  else if(a==='pick')$('#img').click();
+  else if(a==='saveedit'){s.name=$('#e1').value.trim()||s.name;s.artist=$('#e2').value.trim();if(pend){s.cover=pend;s._cu=null}await save('s',s);close();render()}
+  else if(a==='delask')sheet(`<b>تمسح «${esc(s.name)}»؟</b><button class="sb ac" data-a="delok" data-id="${s.id}">أيوه، امسح</button><button class="sb" data-a="cancel">لأ</button>`);
+  else if(a==='delok'){await del('s',s.id);songs=songs.filter(x=>x!==s);queue=queue.filter(x=>x!==s);
+    for(const p of pls)if(p.ids.includes(s.id)){p.ids=p.ids.filter(x=>x!==s.id);await save('p',p)}
+    if(cs===s){au.pause();au.removeAttribute('src');cs=null}close();render()}
+  else if(a==='plmenu'){const p=pls.find(x=>x.id===sub.id);sheet(`<b>${esc(p.name)}</b><button class="sb" data-a="delpl">✕ امسح القائمة (الأغاني تفضل موجودة)</button>`)}
+  else if(a==='delpl'){const p=pls.find(x=>x.id===sub.id);await del('p',p.id);pls=pls.filter(x=>x!==p);sub=null;close();render()}
+  else if(a==='cancel')close();
+}
+document.addEventListener('click',act);
+$('#ov').onclick=e=>{if(e.target.id==='ov')close()};
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  tab=b.dataset.t;sub=null;document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));$('#np').style.display='none';render()});
+document.addEventListener('input',e=>{if(e.target.id==='q'){q=e.target.value.trim().toLowerCase();res()}});
+$('#img').onchange=e=>{pend=e.target.files[0]||null;const k=$('#pk');if(k&&pend)k.textContent='✓ تم اختيار: '+pend.name;e.target.value=''};
+$('#file').onchange=async e=>{
+  for(const f of e.target.files){const s={name:f.name.replace(/\.[^.]+$/,''),blob:f,fav:false};await save('s',s);songs.push(s)}
+  e.target.value='';const first=!cs&&songs.length;render();if(first)play(songs,0);
+};
+$('#sk').oninput=e=>{if(au.duration)au.currentTime=au.duration*e.target.value/1000};
+au.ontimeupdate=()=>{$('#cu').textContent=fmt(au.currentTime);const p=au.duration?au.currentTime/au.duration:0;$('#sk').value=p*1000;$('#pg').style.width=p*100+'%'};
+au.onloadedmetadata=()=>$('#du').textContent=fmt(au.duration);
+au.onplay=au.onpause=upd;
+au.onended=()=>next(true);
+if('mediaSession' in navigator){try{
+  navigator.mediaSession.setActionHandler('nexttrack',()=>next(false));
+  navigator.mediaSession.setActionHandler('previoustrack',prev);
+}catch(e){}}
+if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+(async()=>{try{db=await openDB();songs=await getAll('s');pls=await getAll('p')}catch(e){db=null}render()})();
+</script>
+</body>
+</html>
