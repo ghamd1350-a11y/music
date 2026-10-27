@@ -71,7 +71,7 @@ nav button.on{color:var(--tx);font-weight:600}
 #np .top{display:flex;justify-content:space-between;align-items:center;font-size:13px}
 #np .top button{font-size:26px;padding:6px 10px;color:#fff}
 #np .ti{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px}
-#np .ti b{font-size:22px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+#np .ti b{font-size:22px;font-weight:800;line-height:1.35;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 #np small{color:#ffffffb3}
 #np .sk{direction:ltr;display:flex;align-items:center;gap:10px;margin-top:14px;font-size:12px;color:#ffffffb3}
 #np .sk input{flex:1;accent-color:#fff}
@@ -121,16 +121,17 @@ nav button.on{color:var(--tx);font-weight:600}
 <div id="ov"><div id="sheet"></div></div>
 <script>
 const $=s=>document.querySelector(s);
-let db=null,songs=[],pls=[],cs=null,queue=[],shuf=false,rep=0,url=null,tab='home',sub=null,lf='all',q='',pend=null;
+let db=null,songs=[],pls=[],cs=null,queue=[],shuf=false,rep=0,url=null,tab='home',sub=null,lf='all',q='',pend=null,userPaused=false;
 const au=new Audio();
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmt=t=>isFinite(t)?Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0'):'0:00';
 const hue=n=>{let h=0;for(const c of n)h=(h*31+c.charCodeAt(0))%360;return h};
 const grad=n=>`linear-gradient(135deg,hsl(${hue(n)} 55% 42%),hsl(${(hue(n)+50)%360} 60% 22%))`;
 const cu=s=>s._cu||(s._cu=URL.createObjectURL(s.cover));
-const art=(s,c='')=>s.cover?`<div class="art ${c}" style="background-image:url(${cu(s)})"></div>`:`<div class="art ${c}" style="background:${grad(s.name)}">${esc([...s.name][0]||'♪')}</div>`;
+const art=(s,c='')=>s.cover?`<div class="art ${c}" style="background-image:url(${cu(s)})"></div>`:`<div class="art ${c}" style="background:${grad(s.name)}">${esc(ini(s.name))}</div>`;
 const likedArt=c=>`<div class="art ${c||''}" style="background:linear-gradient(135deg,#450af5,#c4efd9)">♥</div>`;
 const plArt=(p,c)=>`<div class="art ${c||''}" style="background:linear-gradient(135deg,hsl(${hue(p.name)} 50% 40%),#222)">☰</div>`;
+const ini=n=>(n.match(/[\p{L}\p{N}]/u)||['♪'])[0];
 const sg=id=>songs.find(s=>s.id===id);
 const artist=s=>s.artist||'مكتبتي';
 function openDB(){return new Promise((res,rej)=>{try{const r=indexedDB.open('offline-music',2);r.onupgradeneeded=()=>{const d=r.result;for(const n of['s','p'])if(!d.objectStoreNames.contains(n))d.createObjectStore(n,{keyPath:'id',autoIncrement:true})};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}})}
@@ -184,17 +185,19 @@ function upd(){
   const ic=au.paused?'▶':'❚❚';$('#mpp').textContent=ic;$('#npp').textContent=ic;
   if(!cs)return;
   $('#mart').innerHTML=art(cs);$('#mnm').textContent=cs.name;$('#mar').textContent=artist(cs);
-  const n=$('#nart');n.style.background=cs.cover?'':grad(cs.name);n.style.backgroundImage=cs.cover?`url(${cu(cs)})`:'';n.textContent=cs.cover?'':([...cs.name][0]||'♪');
+  const n=$('#nart');n.style.background=cs.cover?'':grad(cs.name);n.style.backgroundImage=cs.cover?`url(${cu(cs)})`:'';n.textContent=cs.cover?'':ini(cs.name);
   $('#nnm').textContent=cs.name;$('#nar').textContent=artist(cs);
   $('#np').style.background=`linear-gradient(hsl(${hue(cs.name)} 45% 28%),var(--bg) 75%)`;
   $('#mini').style.background=`hsl(${hue(cs.name)} 35% 22%)`;
   for(const id of['mfav','nfav']){const b=$('#'+id);b.textContent=cs.fav?'♥':'♡';b.style.color=cs.fav?'var(--ac)':'#ffffffb3'}
 }
+function artURL(s){if(s.cover)return cu(s);const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d'),k=hue(s.name),g=x.createLinearGradient(0,0,256,256);g.addColorStop(0,`hsl(${k} 55% 42%)`);g.addColorStop(1,`hsl(${(k+50)%360} 60% 22%)`);x.fillStyle=g;x.fillRect(0,0,256,256);x.fillStyle='#ffffffcc';x.font='bold 120px sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(ini(s.name),128,138);return c.toDataURL('image/png')}
+function setMeta(){if(!('mediaSession' in navigator)||!cs)return;try{navigator.mediaSession.metadata=new MediaMetadata({title:cs.name,artist:artist(cs),album:'مكتبتي',artwork:[{src:artURL(cs),sizes:'256x256'}]})}catch(e){}}
 function play(list,i){
   if(i<0||i>=list.length)return;
   queue=list;cs=list[i];if(url)URL.revokeObjectURL(url);
-  url=URL.createObjectURL(cs.blob);au.src=url;au.play().catch(()=>{});
-  if('mediaSession' in navigator){try{navigator.mediaSession.metadata=new MediaMetadata({title:cs.name,artist:artist(cs)})}catch(e){}}
+  url=URL.createObjectURL(cs.blob);au.src=url;userPaused=false;au.play().catch(()=>{});
+  setMeta();
   render();
 }
 function next(auto){
@@ -232,7 +235,7 @@ async function act(e){
   else if(a==='shufall'){const L=ctx();if(L.length){shuf=true;$('#sh').classList.add('on');play(L,Math.floor(Math.random()*L.length))}}
   else if(a==='fav'){const t=s||cs;if(!t)return;t.fav=!t.fav;await save('s',t);close();render()}
   else if(a==='menu'){const t=s||cs;if(t)songMenu(t)}
-  else if(a==='pp'){if(!cs){const L=ctx();if(L.length)play(L,0)}else au.paused?au.play():au.pause()}
+  else if(a==='pp'){if(!cs){const L=ctx();if(L.length)play(L,0)}else if(au.paused){userPaused=false;au.play()}else{userPaused=true;au.pause()}}
   else if(a==='open')$('#np').style.display='flex';
   else if(a==='close')$('#np').style.display='none';
   else if(a==='next')next(false);
@@ -269,12 +272,15 @@ $('#file').onchange=async e=>{
 $('#sk').oninput=e=>{if(au.duration)au.currentTime=au.duration*e.target.value/1000};
 au.ontimeupdate=()=>{$('#cu').textContent=fmt(au.currentTime);const p=au.duration?au.currentTime/au.duration:0;$('#sk').value=p*1000;$('#pg').style.width=p*100+'%'};
 au.onloadedmetadata=()=>$('#du').textContent=fmt(au.duration);
-au.onplay=au.onpause=upd;
+au.onplay=()=>{if('mediaSession' in navigator)navigator.mediaSession.playbackState='playing';upd()};
+au.onpause=()=>{if('mediaSession' in navigator)navigator.mediaSession.playbackState='paused';upd();
+  if(document.hidden&&!userPaused&&!au.ended&&cs)setTimeout(()=>{if(au.paused&&!userPaused)au.play().catch(()=>{})},200)};
 au.onended=()=>next(true);
-if('mediaSession' in navigator){try{
-  navigator.mediaSession.setActionHandler('nexttrack',()=>next(false));
-  navigator.mediaSession.setActionHandler('previoustrack',prev);
-}catch(e){}}
+if('mediaSession' in navigator){const m=navigator.mediaSession,H=(a,f)=>{try{m.setActionHandler(a,f)}catch(e){}};
+  H('play',()=>{userPaused=false;au.play()});H('pause',()=>{userPaused=true;au.pause()});
+  H('nexttrack',()=>next(false));H('previoustrack',prev);
+  H('seekto',d=>{if(d.seekTime!=null)au.currentTime=d.seekTime});
+  H('seekforward',()=>{au.currentTime+=10});H('seekbackward',()=>{au.currentTime-=10})}
 if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 (async()=>{try{db=await openDB();songs=await getAll('s');pls=await getAll('p')}catch(e){db=null}render()})();
